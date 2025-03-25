@@ -16,3 +16,10 @@ Ensure you have **Python 3.10+** installed. Then, install the dependencies:
 
 ```sh
 pip install -r requirements.txt
+
+
+## Attribution
+
+This project is based on [LangChain Crash Course](https://github.com/bhancockio/langchain-crash-course)  
+by [Brandon Hancock](https://github.com/bhancockio), licensed under the MIT License.  
+Modifications were made to enhance/extend the original project.
