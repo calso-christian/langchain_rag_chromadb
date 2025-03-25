@@ -52,7 +52,7 @@ coverage.xml
 cover/
 
 # Large Files
-/db
+db/
 
 # Translations
 *.mo
