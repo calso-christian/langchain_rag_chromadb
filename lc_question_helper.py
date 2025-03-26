@@ -1,11 +1,15 @@
 import os
 from dotenv import load_dotenv
+from typing import TypedDict
 load_dotenv()
 
-
+from langchain_core.runnables import RunnableLambda
 from langchain_community.vectorstores import Chroma
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+class QueryInput(TypedDict):
+    query: str
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 persistent_directory = os.path.join(current_dir, 'db','chroma_db_with_metadata')
@@ -38,28 +42,23 @@ def format_input(query, relevant_docs):
         Please provide an answer based only on the provided documents.
         If the answer is not found, respond with 'I'm not sure'
     """
-def generate_response(query):
-
-    relevant_docs=retrieve_relevant_docs(query)
-    combined_input=format_input(query,relevant_docs)
+def create_chain():
 
     model = ChatOpenAI(model='gpt-4o-mini')
 
-    messages = (
-        SystemMessage(content='You are a helpful assistant'),
-        HumanMessage(content=combined_input)
-    )
+    def process_query(inputs: QueryInput):
+        query = inputs["query"] 
+        relevant_docs=retrieve_relevant_docs(query)
+        combined_input=format_input(query,relevant_docs)
 
-    result = model.invoke(messages)
-    return result.content
+        messages = (
+            SystemMessage(content='You are a helpful assistant'),
+            HumanMessage(content=combined_input)
+        )
+
+        result = model.invoke(messages)
+        return result.content
+    
+    return RunnableLambda(process_query).with_types(input_type=QueryInput)
 
 
-
-
-if __name__ == "__main__":
-    user_query = input('Enter your question: ')
-
-    response=generate_response(user_query)
-
-    print('\n--- Generated Response ---\n')
-    print(response)
