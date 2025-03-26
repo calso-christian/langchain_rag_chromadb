@@ -22,7 +22,7 @@ db = Chroma(persist_directory=persistent_directory,
 
 retriever = db.as_retriever(
     search_type='similarity',
-    search_kwargs={'k':1,}
+    search_kwargs={'k':3,}
 )
 
 def retrieve_relevant_docs(query):
@@ -60,5 +60,3 @@ def create_chain():
         return result.content
     
     return RunnableLambda(process_query).with_types(input_type=QueryInput)
-
-
