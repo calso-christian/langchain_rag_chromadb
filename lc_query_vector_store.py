@@ -9,14 +9,14 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-persistent_directory = os.path.join(current_dir, 'db','chroma_db_with_metadata')
+persistent_directory = os.path.join(current_dir, 'db','chroma_db_scraper')
 
 embeddings = OpenAIEmbeddings(model='text-embedding-3-small')
 
 db = Chroma(persist_directory=persistent_directory,
             embedding_function=embeddings)
 
-sample_query = 'Who is Frankenstein?'
+sample_query = 'Who is Sun Tzu?'
 
 retriever = db.as_retriever(
     search_type='similarity_score_threshold',
