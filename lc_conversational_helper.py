@@ -90,6 +90,28 @@ question_answer_chain = create_stuff_documents_chain(model,qa_prompt)
 rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
 
+chat_histories = {}
+
+def chat(user_id: str, message: str) -> str:
+    if user_id not in chat_histories:
+        chat_histories[user_id] = []
+    
+    chat_history = chat_histories[user_id]
+
+    try:
+        result = rag_chain.invoke({'input':message, 'chat_history':chat_history})
+        response=result['answer']
+
+        chat_history.append(HumanMessage(content=message))
+        chat_history.append(SystemMessage(content=response))
+
+        return response
+
+    except Exception as e:
+        return f'Error: {str(e)}'
+
+
+
 def continual_chat():
     print("Start chatting with the AI! Type 'exit' to end the conversation.")
     chat_history = [] 
