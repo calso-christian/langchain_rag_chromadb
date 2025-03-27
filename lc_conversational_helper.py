@@ -11,20 +11,29 @@ from langchain_community.vectorstores import Chroma
 from langchain_core.messages import HumanMessage,SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain.retrievers import EnsembleRetriever
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-persistent_directory = os.path.join(current_dir, 'db','chroma_db_with_metadata')
+db_paths = {
+    "metadata": os.path.join(current_dir, 'db','chroma_db_with_metadata'),
+    "scraper": os.path.join(current_dir, 'db','chroma_db_scraper')
+}
+
 
 embeddings = OpenAIEmbeddings(model='text-embedding-3-small')
 
-db = Chroma(persist_directory=persistent_directory,
-            embedding_function=embeddings)
+retrievers = {
+    name: Chroma(persist_directory=path,embedding_function=embeddings).as_retriever(search_type='similarity', search_kwargs={'k': 3})
+    for name, path in db_paths.items()
+}
+
+multi_retrievers = EnsembleRetriever(retrievers=list(retrievers.values()))
 
 
-retriever = db.as_retriever(
-    search_type='similarity',
-    search_kwargs={'k':3,}
-)
+# retriever = db.as_retriever(
+#     search_type='similarity',
+#     search_kwargs={'k':3,}
+# )
 
 model=ChatOpenAI(model='gpt-4o')
 
@@ -45,7 +54,7 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
 )
 
 history_aware_retriever = create_history_aware_retriever(
-    model, retriever, contextualize_q_prompt
+    model, multi_retrievers, contextualize_q_prompt
 )
 
 
